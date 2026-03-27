@@ -44,7 +44,13 @@ googleRouter.get('/auth-url', (req: AuthRequest, res: Response): void => {
 googleRouter.get('/callback', async (req: Request, res: Response): Promise<void> => {
   console.log("🔥 FRONTEND_URL:", process.env.FRONTEND_URL);
   const { code, state, error } = req.query;
-  const frontend = process.env.FRONTEND_URL || 'http://localhost:5173';
+  const frontend = process.env.FRONTEND_URL;
+
+if (!frontend) {
+  console.error("❌ FRONTEND_URL is missing");
+  res.status(500).send("Server misconfiguration");
+  return;
+}
 
   if (error || !code || !state) {
     res.redirect(`${frontend}/settings?google=error&reason=${error || 'missing_params'}`);
