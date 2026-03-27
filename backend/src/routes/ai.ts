@@ -1,6 +1,6 @@
 import { Router, Response } from 'express';
 import { AuthRequest } from '../middleware/requireAuth';
-import { generateDocument, SYSTEM_PROMPT, DOC_PROMPTS, DocType } from '../lib/gemini';
+import { generateDocument, SYSTEM_PROMPT } from '../lib/gemini';
 import { supabase } from '../lib/supabase';
 import { body, validationResult } from 'express-validator';
 import { logAudit, logger } from '../lib/logger';
@@ -9,44 +9,48 @@ export const aiRouter = Router();
 
 const INJECTION = [/ignore.*instructions/i, /forget.*instructions/i, /you are now/i, /act as/i, /system prompt/i];
 
-aiRouter.post('/draft',
-  body('prompt').trim().isLength({ min: 10, max: 5000 }),
-  body('doc_type').isIn(['pleading','contract','demand_letter','legal_opinion','affidavit','other']),
-  body('title').optional().trim().isLength({ max: 300 }),
-  body('case_id').optional().isUUID(),
-  async (req: AuthRequest, res: Response): Promise<void> => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) { res.status(422).json({ error: errors.array()[0].msg }); return; }
-
+aiRouter.post('/draft', async (req: AuthRequest, res: Response) => {
+  try {
     const { prompt, doc_type, case_id, title } = req.body;
-    const firmId = req.profile?.firm_id;
-    if (!firmId) { res.status(400).json({ error: 'No firm linked to your account' }); return; }
 
-    for (const p of INJECTION) {
-      if (p.test(prompt)) { res.status(400).json({ error: 'Invalid input' }); return; }
+    if (!prompt || prompt.length < 10) {
+      return res.status(400).json({ error: "Prompt too short" });
     }
 
-    try {
-      const typePrompt = DOC_PROMPTS[doc_type as DocType] || DOC_PROMPTS.other;
-      const content = await generateDocument(SYSTEM_PROMPT, `${typePrompt}\n\nMatter: ${prompt}\n\nProduce the complete document.`);
+    const firmId = req.profile?.firm_id;
+    if (!firmId) {
+      return res.status(400).json({ error: "No firm linked" });
+    }
 
-      const { data: doc, error } = await supabase.from('documents').insert({
+    const content = await generateDocument(
+      SYSTEM_PROMPT,
+      `Document Type: ${doc_type}\n\nUser Request:\n${prompt}\n\nGenerate a COMPLETE legal document.`
+    );
+
+    const { data, error } = await supabase
+      .from("documents")
+      .insert({
         firm_id: firmId,
         case_id: case_id || null,
         created_by: req.user!.id,
-        title: title || `${doc_type} — ${new Date().toLocaleDateString('en-KE')}`,
-        doc_type, content, prompt, status: 'draft',
-      }).select().single();
+        title: title || `${doc_type} - ${new Date().toLocaleDateString()}`,
+        doc_type,
+        content,
+        prompt,
+        status: "draft",
+      })
+      .select()
+      .single();
 
-      if (error) throw error;
-      logAudit('AI_DRAFT', req.user!.id, { doc_type });
-      res.json({ document: doc });
-    } catch (err: any) {
-      logger.error('AI draft error', { error: err.message });
-      res.status(500).json({ error: 'Failed to generate document. Please try again.' });
-    }
+    if (error) throw error;
+
+    res.json({ document: data });
+
+  } catch (err: any) {
+    console.error("DRAFT ERROR:", err.message);
+    res.status(500).json({ error: err.message });
   }
-);
+});
 
 aiRouter.post('/refine',
   body('document_id').isUUID(),
