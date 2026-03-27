@@ -95,9 +95,10 @@ googleRouter.post('/create-doc', async (req: AuthRequest, res: Response): Promis
       }
     });
     if (!(tokenRow as any).refresh_token) {
-      return res.status(400).json({ 
-       error: "Missing refresh token. Please reconnect Google account." 
-     });
+  res.status(400).json({ 
+    error: "Missing refresh token. Please reconnect Google account." 
+  });
+  return;
 }
     const docs = google.docs({ version: 'v1', auth: oauth2 });
     const drive = google.drive({ version: 'v3', auth: oauth2 });
