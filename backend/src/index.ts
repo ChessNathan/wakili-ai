@@ -39,7 +39,7 @@ app.get('/health', (_,res) => res.json({ status:'ok', ts:new Date().toISOString(
 
 // Public routes
 app.use('/api/auth',             authLimiter, authRouter);
-app.use('/api/google/callback',  googleRouter);
+app.use('/api/google', googleRouter);
 
 // Protected routes
 app.use('/api/documents', requireAuth, documentsRouter);
