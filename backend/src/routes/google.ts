@@ -75,10 +75,32 @@ googleRouter.post('/create-doc', async (req: AuthRequest, res: Response): Promis
 
   try {
     const oauth2 = oauthClient();
-    oauth2.setCredentials({ access_token: (tokenRow as any).access_token, refresh_token: (tokenRow as any).refresh_token });
+
+    oauth2.setCredentials({
+      access_token: (tokenRow as any).access_token,
+      refresh_token: (tokenRow as any).refresh_token,
+    });
+
+    //  AUTO REFRESH TOKEN (THIS IS WHAT YOU WERE MISSING)
+    oauth2.on("tokens", async (tokens) => {
+      if (tokens.access_token) {
+        await supabase
+          .from("google_tokens")
+          .update({
+            access_token: tokens.access_token,
+            expires_at: new Date(Date.now() + 3600 * 1000).toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+          .eq("user_id", req.user!.id);
+      }
+    });
+    if (!(tokenRow as any).refresh_token) {
+      return res.status(400).json({ 
+       error: "Missing refresh token. Please reconnect Google account." 
+     });
+}
     const docs = google.docs({ version: 'v1', auth: oauth2 });
     const drive = google.drive({ version: 'v3', auth: oauth2 });
-
     // Create doc
     const created = await docs.documents.create({ requestBody: { title: doc.title } });
     const docId = created.data.documentId!;
