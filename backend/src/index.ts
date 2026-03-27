@@ -41,13 +41,12 @@ app.get('/health', (_,res) => res.json({ status:'ok', ts:new Date().toISOString(
 app.use('/api/auth',             authLimiter, authRouter);
 app.use('/api/google', googleRouter);
 
-// Protected routes
+// ✅ PROTECTED ROUTES
 app.use('/api/documents', requireAuth, documentsRouter);
 app.use('/api/cases',     requireAuth, casesRouter);
 app.use('/api/clients',   requireAuth, clientsRouter);
 app.use('/api/deadlines', requireAuth, deadlinesRouter);
 app.use('/api/ai',        requireAuth, aiLimiter, aiRouter);
-app.use('/api/google',    requireAuth, googleRouter);
 
 app.use((_,res) => res.status(404).json({ error:'Not found' }));
 app.use((err:Error,_req:any,res:any,_next:any) => {
