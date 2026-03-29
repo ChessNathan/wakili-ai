@@ -575,7 +575,7 @@ export function DrafterPage() {
                   </div>
 
                   {/* Form */}
-                  <div style={{ padding: '20px 22px' }}>
+                  <div style={{ padding: '20px 22px', display: 'flex', flexDirection: 'column', height: '100%' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 200px', gap: 14, marginBottom: 14 }}>
                       <div>
                         <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink-2)', display: 'block', marginBottom: 5 }}>Title <span style={{ color: 'var(--muted)' }}>(optional)</span></label>
@@ -604,18 +604,18 @@ export function DrafterPage() {
                     {error && <div style={{ marginBottom: 12 }}><Alert type="error" message={error} /></div>}
 
                     
-                    <Button  variant="gold"
-  size="lg"
-  loading={loading}
-  onClick={generate}
-  disabled={loading}
-  style={{
-    width: '100%',
-    background: '#16a34a',
-    color: '#fff',
-    fontWeight: '700'
-  }}
-></Button>
+                    <div style={{ marginTop: 'auto' }}>
+  <Button
+    variant="gold"
+    size="lg"
+    loading={loading}
+    onClick={generate}
+    leftIcon={<Sparkles size={17} />}
+    style={{ width: '100%' }}
+  >
+    {loading ? 'Generating document…' : 'Generate Document'}
+  </Button>
+</div>
                   </div>
                 </div>
               )}
