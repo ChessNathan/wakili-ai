@@ -548,7 +548,7 @@ export function DrafterPage() {
 
               {/* ── GENERATE VIEW ── */}
               {view === 'generate' && (
-                <div style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: 14, overflow: 'hidden', boxShadow: 'var(--shadow-sm)' }}>
+                <div style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: 14, boxShadow: 'var(--shadow-sm)' }}>
                   {/* Header */}
                   <div style={{ padding: '16px 22px', borderBottom: '1px solid var(--border)', background: 'var(--forest)', display: 'flex', alignItems: 'center', gap: 12 }}>
                     <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(201,168,76,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
