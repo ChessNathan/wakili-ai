@@ -167,7 +167,7 @@ export function SettingsPage() {
               </div>
             </div>
 
-            /* Setup guide
+            {/* Setup guide
             <div style={{ background:'#FFFBEB', border:'1px solid #FCD34D', borderRadius:14, padding:'20px 24px' }}>
               <div style={{ fontSize:15, fontWeight:700, color:'#92400E', marginBottom:14, display:'flex', alignItems:'center', gap:8 }}>
                 <Settings size={16} />Google Cloud Console Setup
@@ -188,7 +188,7 @@ export function SettingsPage() {
               </ol>
             </div>
           </div>
-        )}*/
+        )}*/}
 
         {/* ── FIRM DETAILS ── */}
         {tab === 'firm' && (
