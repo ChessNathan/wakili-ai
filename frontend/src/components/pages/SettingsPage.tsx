@@ -161,6 +161,7 @@ export function SettingsPage() {
                         <div style={{ fontSize:13, color:'var(--green)', marginTop:2, opacity:0.8 }}>Drive and Docs integration is active.</div>
                       </div>
                     </div>
+                    <Button variant="danger" size="sm" onClick={disconnectGoogle}>Disconnect</Button>
                     <div style={{ background:'#FFFBEB', border:'1px solid #FCD34D', borderRadius:10, padding:'12px 16px', fontSize:13, color:'#92400E', lineHeight:1.6 }}>
                       <strong>⚠ Cannot see your Drive files?</strong> Click <strong>Reconnect Google</strong> below — updated permissions (full Drive access) are needed to list your documents. You only need to do this once.
                     </div>
