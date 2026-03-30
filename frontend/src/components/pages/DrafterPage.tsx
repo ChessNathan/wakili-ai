@@ -323,7 +323,7 @@ function DocEditor({
       <div style={{ background: '#fff', borderTop: '1px solid var(--border)', padding: '8px 24px', display: 'flex', alignItems: 'center', gap: 16, fontSize: 12, color: 'var(--muted)', flexShrink: 0 }}>
         <span>{content.trim().split(/\s+/).filter(Boolean).length} words</span>
         <span>{content.length} characters</span>
-        <span style={{ marginLeft: 'auto' }}>⌘+S to save</span>
+        <span style={{ marginLeft: 'auto' }}>Ctrl+S to save</span>
       </div>
     </div>
   );
@@ -616,7 +616,7 @@ export function DrafterPage() {
                         onFocus={e => { e.target.style.borderColor = 'var(--forest)'; e.target.style.boxShadow = '0 0 0 3px rgba(27,58,45,0.08)'; }}
                         onBlur={e => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; }}
                         onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) generate(); }} />
-                      <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>Press ⌘+Enter to generate</div>
+                      <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>Press Ctrl+Enter to generate</div>
                     </div>
 
                     {error && <div style={{ marginBottom: 12 }}><Alert type="error" message={error} /></div>}
@@ -630,7 +630,7 @@ export function DrafterPage() {
     leftIcon={<Sparkles size={17} />}
     style={{ width: '100%' }}
   >
-    {loading ? 'Generating document…' : 'Generate Document'} Generate Do
+    {loading ? 'Generating document…' : 'Generate Document'}
   </Button>
 </div>
                   </div>
