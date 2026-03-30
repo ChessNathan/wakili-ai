@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
 import { logger } from './logger';
+import { generateWithOpenAI } from './openai';
 
 if (!process.env.GEMINI_API_KEY) {
   logger.error('GEMINI_API_KEY environment variable is not set');
@@ -112,11 +113,14 @@ export async function generateDocument(systemContext: string, userPrompt: string
         throw new Error('Invalid Gemini API key. Check GEMINI_API_KEY in your Render environment variables.');
       }
       if (err.status === 429 || msg.includes('quota') || msg.includes('RESOURCE_EXHAUSTED')) {
-        throw new Error('Gemini API quota exceeded. Please wait a moment and try again.');
+        logger.warn('Gemini quota hit, trying next model or fallback', { model: modelName });
+lastError = err;
+continue;
       }
       if (err.status === 503 || msg.includes('overloaded') || msg.includes('UNAVAILABLE')) {
-        throw new Error('Gemini AI is temporarily busy. Please try again in a few seconds.');
-      }
+        logger.warn('Gemini quota hit, trying next model or fallback', { model: modelName });
+lastError = err;
+continue; }
 
       // Any other error — re-throw immediately
       throw new Error(msg || 'AI document generation failed. Please try again.');
@@ -124,8 +128,29 @@ export async function generateDocument(systemContext: string, userPrompt: string
   }
 
   // All models exhausted
+  // ───── GEMINI FAILED → FALLBACK TO OPENAI ─────
+logger.warn('All Gemini models failed. Switching to OpenAI fallback...', {
+  lastError: lastError?.message,
+});
+
+try {
+  const openAIResponse = await generateWithOpenAI(systemContext, userPrompt);
+
+  if (!openAIResponse || openAIResponse.trim().length < 50) {
+    throw new Error('OpenAI returned empty response');
+  }
+
+  logger.info('OpenAI fallback success', { chars: openAIResponse.length });
+
+  return openAIResponse;
+
+} catch (fallbackErr: any) {
+  logger.error('OpenAI fallback also failed', {
+    error: fallbackErr.message,
+  });
+
   throw new Error(
-    `No Gemini model is available. Last error: ${lastError?.message || 'unknown'}. ` +
-    'Check that your GEMINI_API_KEY is valid and has access to Gemini models.'
+    'All AI services are currently unavailable. Please try again shortly.'
   );
+}
 }
